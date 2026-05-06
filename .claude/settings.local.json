@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__supabase__list_organizations",
+      "Bash(npm --version)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes)",
+      "Bash(Get-Content \"C:\\\\Users\\\\USER\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-USER-Desktop-sangsangwoori-matching\\\\2b7b72e4-cb2a-40eb-b4b5-e76ce96d95cf\\\\tasks\\\\by000q251.output\" -Wait)",
+      "Bash(Select-String -Pattern \"Success|error|Error|done|Done|created|Created|ready|Ready|✓|✔|failed|Failed\" --SimpleMatch)",
+      "Bash(Get-Content *)"
+    ]
+  }
+}
