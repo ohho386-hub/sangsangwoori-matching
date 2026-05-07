@@ -9,7 +9,9 @@ import type { Senior, Job } from './types'
 export function calculateScore(senior: Senior, job: Job): number {
   let score = 0
 
-  if (norm(senior.region) === norm(job.region)) score += 50
+  const sr = norm(senior.region)
+  const jr = norm(job.region)
+  if (sr === jr || jr.includes(sr) || sr.includes(jr)) score += 50
 
   const sJob = norm(senior.desired_job)
   const jType = norm(job.job_type)

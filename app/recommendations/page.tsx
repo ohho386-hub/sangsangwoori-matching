@@ -17,11 +17,33 @@ function ScoreBar({ score }: { score: number }) {
   )
 }
 
-export default async function RecommendationsPage() {
-  const { data: matches, error } = await supabase
+export default async function RecommendationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ senior?: string }>
+}) {
+  const { senior: seniorId } = await searchParams
+
+  let seniorName: string | null = null
+  if (seniorId) {
+    const { data } = await supabase
+      .from('seniors')
+      .select('name')
+      .eq('id', seniorId)
+      .single()
+    seniorName = data?.name ?? null
+  }
+
+  const query = supabase
     .from('matches')
-    .select('*, seniors(id, name, region, desired_job, career_years, created_at), jobs(id, title, region, job_type, required_career, created_at)')
+    .select(
+      '*, seniors(id, name, region, desired_job, career_years, created_at), jobs(id, title, region, job_type, required_career, created_at)',
+    )
     .order('score', { ascending: false })
+
+  if (seniorId) query.eq('senior_id', seniorId)
+
+  const { data: matches, error } = await query
 
   if (error) {
     return (
@@ -33,30 +55,49 @@ export default async function RecommendationsPage() {
 
   const items = (matches ?? []) as MatchWithRelations[]
 
+  const heading = seniorName
+    ? `${seniorName}님의 매칭 결과`
+    : '자동 매칭 추천'
+
+  const subtitle = seniorName
+    ? `총 ${items.length}개 일자리가 매칭되었습니다 · 점수 높은 순`
+    : `매칭 점수 높은 순 · 총 ${items.length}건`
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold text-gray-900 mb-2">자동 매칭 추천</h1>
-      <p className="text-xl text-gray-500 mb-10">
-        매칭 점수 높은 순 · 총 {items.length}건
-      </p>
+      <h1 className="text-4xl font-bold text-gray-900 mb-2">{heading}</h1>
+      <p className="text-xl text-gray-500 mb-10">{subtitle}</p>
 
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 border-2 border-dashed border-gray-300 rounded-xl text-center">
-          <p className="text-2xl font-semibold text-gray-400">추천 데이터가 없습니다.</p>
+          <p className="text-2xl font-semibold text-gray-400">
+            {seniorName ? '매칭된 일자리가 없습니다.' : '추천 데이터가 없습니다.'}
+          </p>
           <p className="text-lg text-gray-400 mt-2">
-            시니어 프로필을 등록하면 자동으로 매칭이 진행됩니다.
+            {seniorName
+              ? '일자리 조건이 맞는 공고가 등록되면 자동으로 매칭됩니다.'
+              : '시니어 프로필을 등록하면 자동으로 매칭이 진행됩니다.'}
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
           {items.map((item) => (
-            <Card key={item.id} className="border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <Card
+              key={item.id}
+              className="border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+            >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-4">
                   <CardTitle className="text-2xl font-bold text-gray-900">
-                    {item.seniors.name}
-                    <span className="mx-2 text-blue-400">→</span>
-                    {item.jobs.title}
+                    {seniorName ? (
+                      item.jobs.title
+                    ) : (
+                      <>
+                        {item.seniors.name}
+                        <span className="mx-2 text-blue-400">→</span>
+                        {item.jobs.title}
+                      </>
+                    )}
                   </CardTitle>
                   <Badge
                     className={`shrink-0 text-base px-3 py-1 ${
@@ -72,10 +113,12 @@ export default async function RecommendationsPage() {
               <CardContent className="flex flex-col gap-3">
                 <ScoreBar score={Number(item.score)} />
                 <div className="grid grid-cols-2 gap-2 text-lg text-gray-600">
-                  <span>📍 지역: {item.seniors.region}</span>
-                  <span>💼 직종: {item.seniors.desired_job}</span>
-                  <span>📅 경력: {item.seniors.career_years}년</span>
-                  <span>🏢 공고: {item.jobs.region}</span>
+                  <span>📍 공고 지역: {item.jobs.region}</span>
+                  <span>💼 직종: {item.jobs.job_type}</span>
+                  <span>📅 요구 경력: {item.jobs.required_career}년 이상</span>
+                  {!seniorName && (
+                    <span>👤 지원자: {item.seniors.name} ({item.seniors.region})</span>
+                  )}
                 </div>
               </CardContent>
             </Card>
