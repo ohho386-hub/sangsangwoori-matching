@@ -7,6 +7,7 @@ import { SubmitButton } from '@/components/submit-button'
 
 const REGIONS = ['서울', '경기', '인천', '기타']
 const JOB_TYPES = ['경비', '청소', '조리', '돌봄', '기타']
+const AGE_GROUPS = ['40대', '50대', '60대', '70대']
 
 const selectClass =
   'w-full rounded-lg border-2 border-gray-300 bg-white px-5 py-4 text-xl focus:border-blue-500 focus:outline-none'
@@ -102,6 +103,21 @@ export default function RegisterPage() {
             {JOB_TYPES.map((j) => (
               <option key={j} value={j}>
                 {j}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* 연령대 */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xl font-semibold text-gray-800" htmlFor="age_group">
+            연령대
+          </label>
+          <select id="age_group" name="age_group" defaultValue="" className={selectClass}>
+            <option value="">-- 선택해 주세요 --</option>
+            {AGE_GROUPS.map((a) => (
+              <option key={a} value={a}>
+                {a}
               </option>
             ))}
           </select>

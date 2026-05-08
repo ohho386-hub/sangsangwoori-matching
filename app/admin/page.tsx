@@ -106,7 +106,7 @@ export default async function AdminPage() {
           <table className="w-full text-left">
             <thead className="bg-gray-100 border-b-2 border-gray-200">
               <tr>
-                {['이름', '지역', '희망 직종', '최고 매칭 점수', '상태', ''].map((h) => (
+                {['이름', '연령대', '지역', '희망 직종', '최고 매칭 점수', '상태', ''].map((h) => (
                   <th key={h} className="px-5 py-4 text-lg font-bold text-gray-700">
                     {h}
                   </th>
@@ -116,7 +116,7 @@ export default async function AdminPage() {
             <tbody>
               {seniors.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-10 text-center text-lg text-gray-400">
+                  <td colSpan={7} className="px-5 py-10 text-center text-lg text-gray-400">
                     등록된 시니어가 없습니다.
                   </td>
                 </tr>
@@ -127,6 +127,7 @@ export default async function AdminPage() {
                   return (
                     <tr key={senior.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                       <td className="px-5 py-4 text-lg font-medium text-gray-900">{senior.name}</td>
+                      <td className="px-5 py-4 text-lg text-gray-700">{senior.age_group ?? '-'}</td>
                       <td className="px-5 py-4 text-lg text-gray-700">{senior.region}</td>
                       <td className="px-5 py-4 text-lg text-gray-700">{senior.desired_job}</td>
                       <td className="px-5 py-4 text-lg text-gray-700">

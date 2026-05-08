@@ -57,6 +57,7 @@ export async function registerSenior(
   const region = ((formData.get('region') as string) ?? '').trim()
   const desired_job = ((formData.get('desired_job') as string) ?? '').trim()
   const career_years = parseInt(formData.get('career_years') as string, 10) || 0
+  const age_group = ((formData.get('age_group') as string) ?? '').trim() || null
 
   const fieldErrors: NonNullable<RegisterState>['fieldErrors'] = {}
   if (!name) fieldErrors.name = '이름을 입력해 주세요.'
@@ -66,7 +67,7 @@ export async function registerSenior(
 
   const { data: newSenior, error } = await supabase
     .from('seniors')
-    .insert({ name, region, desired_job, career_years })
+    .insert({ name, region, desired_job, career_years, age_group })
     .select()
     .single()
 
