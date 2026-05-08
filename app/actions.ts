@@ -75,6 +75,7 @@ export async function registerSenior(
 
   await rematchSenior(newSenior as Senior)
 
+  revalidatePath('/admin')
   return { success: true, seniorId: (newSenior as Senior).id }
 }
 
