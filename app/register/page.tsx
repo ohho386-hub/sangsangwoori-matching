@@ -36,7 +36,7 @@ export default function RegisterPage() {
             </p>
           </div>
           <Link
-            href={`/recommendations?senior=${state.seniorId}`}
+            href={`/recommendations?senior_id=${state.seniorId}`}
             className="inline-flex items-center justify-center w-full rounded-lg bg-green-700 hover:bg-green-800 px-6 py-5 text-xl font-bold text-white transition-colors"
           >
             내 매칭 결과 보기 →

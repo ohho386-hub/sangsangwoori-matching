@@ -5,6 +5,41 @@ import { supabase } from '@/lib/supabase'
 import { calculateScore } from '@/lib/matching'
 import type { Job, Senior } from '@/lib/types'
 
+// ── 매칭 재계산 헬퍼 ──────────────────────────────────────────
+// 트리거 대신 앱 레이어에서 재계산
+
+async function rematchSenior(senior: Senior) {
+  const { data: jobs } = await supabase.from('jobs').select('*')
+  if (!jobs || jobs.length === 0) return
+
+  const rows = (jobs as Job[]).map((job) => ({
+    senior_id: senior.id,
+    job_id: job.id,
+    score: calculateScore(senior, job),
+    status: 'pending' as const,
+  }))
+
+  await supabase
+    .from('matches')
+    .upsert(rows, { onConflict: 'senior_id,job_id', ignoreDuplicates: false })
+}
+
+async function rematchJob(job: Job) {
+  const { data: seniors } = await supabase.from('seniors').select('*')
+  if (!seniors || seniors.length === 0) return
+
+  const rows = (seniors as Senior[]).map((senior) => ({
+    senior_id: senior.id,
+    job_id: job.id,
+    score: calculateScore(senior, job),
+    status: 'pending' as const,
+  }))
+
+  await supabase
+    .from('matches')
+    .upsert(rows, { onConflict: 'senior_id,job_id', ignoreDuplicates: false })
+}
+
 // ── 시니어 등록 ─────────────────────────────────────────────
 
 export type RegisterState = {
@@ -37,18 +72,7 @@ export async function registerSenior(
 
   if (error) return { success: false, serverError: error.message }
 
-  const { data: jobs } = await supabase.from('jobs').select('*')
-  if (jobs && jobs.length > 0) {
-    const matches = (jobs as Job[])
-      .map((job) => ({
-        senior_id: (newSenior as Senior).id,
-        job_id: job.id,
-        score: calculateScore(newSenior as Senior, job),
-        status: 'pending' as const,
-      }))
-      .filter((m) => m.score > 0)
-    if (matches.length > 0) await supabase.from('matches').insert(matches)
-  }
+  await rematchSenior(newSenior as Senior)
 
   return { success: true, seniorId: (newSenior as Senior).id }
 }
@@ -105,18 +129,7 @@ export async function createJob(
 
   if (error) return { success: false, serverError: error.message }
 
-  const { data: seniors } = await supabase.from('seniors').select('*')
-  if (seniors && seniors.length > 0 && newJob) {
-    const matches = (seniors as Senior[])
-      .map((senior) => ({
-        senior_id: senior.id,
-        job_id: (newJob as Job).id,
-        score: calculateScore(senior, newJob as Job),
-        status: 'pending' as const,
-      }))
-      .filter((m) => m.score > 0)
-    if (matches.length > 0) await supabase.from('matches').insert(matches)
-  }
+  await rematchJob(newJob as Job)
 
   revalidatePath('/admin')
   return { success: true }

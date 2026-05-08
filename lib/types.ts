@@ -16,7 +16,7 @@ export type Job = {
   created_at: string
 }
 
-export type MatchStatus = 'pending' | 'assigned'
+export type MatchStatus = 'pending' | 'assigned' | 'done'
 
 export type Match = {
   id: string
